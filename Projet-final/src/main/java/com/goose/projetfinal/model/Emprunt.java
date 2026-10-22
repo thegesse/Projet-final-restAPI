@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @NoArgsConstructor
@@ -18,22 +19,21 @@ public class Emprunt {
     private Long id;
 
     @Column(nullable = false)
-    private long livre_id;
+    private Long livreId;
 
     @Column(nullable = false)
     private String emprunteur;
 
     @Column(nullable = false)
-    private String email_emprunteur;
+    private String emailEmprunteur;
 
     @Column(nullable = false)
-    LocalDateTime date_emprunt;
+    LocalDate dateEmprunt;
 
     @Column(nullable = false)
-    LocalDateTime date_retour_prevue;
+    LocalDate dateRetourPrevue;
 
-    @Column
-    LocalDateTime date_retour_effective;
+    LocalDate dateRetourEffective;
 
     @Column(nullable = false)
     private Boolean rendu;

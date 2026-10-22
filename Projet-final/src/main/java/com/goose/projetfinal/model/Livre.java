@@ -13,7 +13,7 @@ import lombok.NoArgsConstructor;
 public class Livre {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    private Long id;
 
     @Column(nullable = false)
     private String titre;
@@ -25,11 +25,11 @@ public class Livre {
     private double prix;
 
     @Column
-    private int annee_publication;
+    private int anneePublication;
 
     @Column(nullable = false)
-    private int stock;
+    private Integer stock;
 
     @Column(nullable = false)
-    private Long auteur_id;
+    private Long auteurId;
 }
