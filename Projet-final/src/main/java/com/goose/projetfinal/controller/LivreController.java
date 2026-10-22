@@ -6,6 +6,7 @@ import com.goose.projetfinal.service.LivreService;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.data.web.PagedModel;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import java.util.List;
 
@@ -55,5 +56,16 @@ public class LivreController {
                 .toList();
 
         return ResponseEntity.ok(livre);
+    }
+
+    @PostMapping
+    public ResponseEntity<LivreResponse> creer(@Valid @RequestBody LivreRequest request) {
+        Livre entiteACreer = livreMapper.versEntite(request);
+        Livre entiteCree = livreService.creer(entiteACreer);
+        LivreResponse response = livreMapper.versResponse(entiteCree);
+
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(response);
     }
 }
