@@ -47,4 +47,13 @@ public class LivreController {
         return ResponseEntity.ok(LivreMapper.versPage(page));
     }
 
+    @GetMapping("/disponibles")
+    public ResponseEntity<List<LivreResponse>> listerDisponibles() {
+        List<LivreResponse> livre = livreService.recupererLivreDisponible()
+                .stream()
+                .map(livreMapper::versResponse)
+                .toList();
+
+        return ResponseEntity.ok(livre);
+    }
 }
