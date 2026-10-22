@@ -68,7 +68,9 @@ public class AuteurController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> supprimer(@PathVariable Long id) {
-        auteurService.supprimer(id);
-        return ResponseEntity.noContent().build();
+        if (auteurService.supprimer(id)) {
+            return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.notFound().build();
     }
 }
