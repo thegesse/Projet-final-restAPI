@@ -4,6 +4,8 @@ package com.goose.projetfinal.controller;
 import com.goose.projetfinal.service.LivreService;
 
 import org.springframework.web.bind.annotation.*;
+import org.springframework.data.web.PageableDefault;
+import org.springframework.data.web.PagedModel;
 import org.springframework.http.ResponseEntity;
 import java.util.List;
 
@@ -34,6 +36,15 @@ public class LivreController {
                 .map(livreMapper::versResponse)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
+    }
+
+    @GetMapping("/recherche")
+    public ResponseEntity<PagedModel<LivreResponse>> rechercher(
+            @RequestParam String titre,
+            @PageableDefault(size = 10, sort = "titre") Pageable pageable) {
+
+        Page<Livre> page = livreService.rechercherParTitre(titre, pageable);
+        return ResponseEntity.ok(LivreMapper.versPage(page));
     }
 
 }
