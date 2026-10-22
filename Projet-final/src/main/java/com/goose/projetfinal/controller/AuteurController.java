@@ -2,7 +2,9 @@ package com.goose.projetfinal.controller;
 
 import com.goose.projetfinal.dto.AuteurRequest;
 import com.goose.projetfinal.dto.AuteurResponse;
+import com.goose.projetfinal.dto.LivreResponse;
 import com.goose.projetfinal.mapper.AuteurMapper;
+import com.goose.projetfinal.mapper.LivreMapper;
 import com.goose.projetfinal.model.Auteur;
 import com.goose.projetfinal.service.AuteurService;
 import jakarta.validation.Valid;
