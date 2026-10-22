@@ -24,12 +24,11 @@ public class AuteurController {
     }
 
     // Écrivez ici les méthodes des endpoints 1 à 5
-    @GetMapping 
+    @GetMapping
     public ResponseEntity<List<AuteurResponse>> listerTous() {
         List<AuteurResponse> auteur = auteurService.recupererTous()
-            .stream()
-            .map(auteurMapper::versResponse)
-            .toList;
+                .stream()
+                .map(auteurMapper::versResponse).toList;
         return ResponseEntity.ok(auteur);
     }
 

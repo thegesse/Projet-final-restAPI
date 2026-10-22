@@ -17,7 +17,7 @@ Travail restant d'après `05-Projet-Fil-Rouge-v3.pdf` (la configuration du proje
 - [ ] Q21 : Créer les DTO `LivreRequest` et `LivreResponse` avec les validations et l'ordre des champs JSON.
 - [ ] Q22 : Créer `LivreMapper` et compléter les conversions des livres.
 - [ ] Q23 : Implémenter les méthodes de `LivreService`.
-- [ ] Q24 : Implémenter les endpoints 7 à 14 des livres dans `LivreController`.
+- [X] Q24 : Implémenter les endpoints 7 à 14 des livres dans `LivreController`.
 - [ ] Q26 : Créer les DTO `EmpruntRequest` et `EmpruntResponse` ; ne pas inclure l'adresse e-mail de l'emprunteur dans les réponses.
 - [ ] Q27 : Créer `EmpruntMapper` avec les conversions demandées et le calcul des retards.
 - [ ] Q28 : Implémenter les méthodes de `EmpruntService`.
