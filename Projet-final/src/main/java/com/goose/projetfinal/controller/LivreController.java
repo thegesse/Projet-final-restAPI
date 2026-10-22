@@ -68,4 +68,20 @@ public class LivreController {
                 .status(HttpStatus.CREATED)
                 .body(response);
     }
+
+    @PatchMapping("/{id}/stock")
+    public ResponseEntity<LivreResponse> ajouterStock(@PathVariable Long id, @Valid @RequestBody LivreRequest request) {
+
+        int quantite = request.getQuantite();
+
+        if (quantite > 0) {
+            Livre livre = livreService.recupererParId(id)
+                    .orElseThrow(() -> new EntityNotFoundException("Livre non trouvé"));
+            livre.setQuantite(livre.getQuantite() + quantite);
+            Livre livreModifie = livreService.mettreAJour(livre);
+            return ResponseEntity.ok(livreMapper.versResponse(livreModifie));
+        } else {
+            return ResponseEntity.badRequest().build();
+        }
+    }
 }
