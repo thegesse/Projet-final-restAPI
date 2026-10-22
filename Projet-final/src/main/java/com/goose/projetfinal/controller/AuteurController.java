@@ -9,6 +9,11 @@ import com.goose.projetfinal.model.Auteur;
 import com.goose.projetfinal.service.AuteurService;
 import jakarta.validation.Valid;
 import java.util.List;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
+import org.springframework.data.web.PagedModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -28,47 +33,34 @@ public class AuteurController {
     // Écrivez ici les méthodes des endpoints 1 à 5
     @GetMapping
     public ResponseEntity<List<AuteurResponse>> listerTous() {
-        List<AuteurResponse> auteur = auteurService.recupererTous()
-                .stream()
-                .map(auteurMapper::versResponse).toList;
+        List<AuteurResponse> auteur = auteurService.recupererTous();
         return ResponseEntity.ok(auteur);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<AuteurResponse> obtenirParId(@PathVariable Long id) {
         return auteurService.recupererParId(id)
-                .map(auteurMapper::versResponse)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
 
     @GetMapping("/{id}/livres")
-    public ResponseEntity<List<LivreResponse>> listerLivres(@PathVariable Long id) {
-        return auteurService.recupererParLivreId(id)
-                .map(LivreMapper::versResponse)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+    public ResponseEntity<PagedModel<LivreResponse>> listerLivres(@PathVariable Long id,  @PageableDefault(size = 10, sort = "titre") Pageable pageable) {
+        Page<LivreResponse> livres = auteurService.recupererParLivreId(id, pageable);
+        return ResponseEntity.ok(new PagedModel<>(livres));
 
     }
 
     @PostMapping
     public ResponseEntity<AuteurResponse> creer(@Valid @RequestBody AuteurRequest request) {
-        Auteur entiteACreer = auteurMapper.versEntite(request);
-        Auteur entiteCree = auteurService.creer(entiteACreer);
-        AuteurResponse response = auteurMapper.versResponse(entiteCree);
-
-        return ResponseEntity
-                .status(HttpStatus.CREATED)
-                .body(response);
+        AuteurResponse response = auteurService.creer(request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<AuteurResponse> mettreAJour(@PathVariable Long id,
             @Valid @RequestBody AuteurRequest request) {
-        Auteur entiteModifiee = auteurMapper.versEntite(request);
-
-        return auteurService.mettreAJour(id, entiteModifiee)
-                .map(auteurMapper::versResponse)
+        return auteurService.mettreAJour(id, request)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
