@@ -4,6 +4,7 @@ import com.goose.projetfinal.service.AuteurService;
 
 import java.util.List;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -36,5 +37,16 @@ public class AuteurController {
                 .map(auteurMapper::versResponse)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
+    }
+
+    @PostMapping
+    public ResponseEntity<AuteurResponse> creer(@Valid @RequestBody AuteurRequest request) {
+        Auteur entiteACreer = auteurMapper.versEntite(request);
+        Auteur entiteCree = auteurService.creer(entiteACreer);
+        AuteurResponse response = auteurMapper.versResponse(entiteCree);
+
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(response);
     }
 }
