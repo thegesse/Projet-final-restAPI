@@ -35,6 +35,15 @@ public class AuteurController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
+    @GetMapping("/{id}/livres")
+    public ResponseEntity<List<LivreResponse>> obtenirLivresParAuteur(@PathVariable Long id) {
+        List<LivreResponse> livres = livreService.recupererParAuteur(id)
+                .stream()
+                .map(livreMapper::versResponse)
+                .toList();
+        return ResponseEntity.ok(livres);
+    }
+
     @PostMapping
     public ResponseEntity<AuteurResponse> creer(@Valid @RequestBody AuteurRequest request) {
         Auteur entiteACreer = auteurMapper.versEntite(request);
