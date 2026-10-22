@@ -1,16 +1,11 @@
 package com.goose.projetfinal.controller;
 
 import com.goose.projetfinal.service.AuteurService;
-
+import jakarta.validation.Valid;
 import java.util.List;
-
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/v1/auteurs")
@@ -60,5 +55,11 @@ public class AuteurController {
                 .map(auteurMapper::versResponse)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> supprimer(@PathVariable Long id) {
+        auteurService.supprimer(id);
+        return ResponseEntity.noContent().build();
     }
 }
