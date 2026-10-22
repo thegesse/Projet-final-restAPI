@@ -3,10 +3,8 @@ package com.goose.projetfinal.controller;
 import com.goose.projetfinal.dto.AuteurRequest;
 import com.goose.projetfinal.dto.AuteurResponse;
 import com.goose.projetfinal.dto.LivreResponse;
-import com.goose.projetfinal.mapper.AuteurMapper;
-import com.goose.projetfinal.mapper.LivreMapper;
-import com.goose.projetfinal.model.Auteur;
 import com.goose.projetfinal.service.AuteurService;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import java.util.List;
 
@@ -16,6 +14,7 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.data.web.PagedModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -23,11 +22,9 @@ import org.springframework.web.bind.annotation.*;
 public class AuteurController {
 
     private final AuteurService auteurService;
-    private final AuteurMapper auteurMapper;
 
-    public AuteurController(AuteurService auteurService, AuteurMapper auteurMapper) {
+    public AuteurController(AuteurService auteurService) {
         this.auteurService = auteurService;
-        this.auteurMapper = auteurMapper;
     }
 
     // Écrivez ici les méthodes des endpoints 1 à 5
@@ -39,16 +36,23 @@ public class AuteurController {
 
     @GetMapping("/{id}")
     public ResponseEntity<AuteurResponse> obtenirParId(@PathVariable Long id) {
-        return auteurService.recupererParId(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+        try {
+            return ResponseEntity.ok(auteurService.recupererParId(id));
+        } catch (EntityNotFoundException exception) {
+            return ResponseEntity.notFound().build();
+        }
     }
 
     @GetMapping("/{id}/livres")
-    public ResponseEntity<PagedModel<LivreResponse>> listerLivres(@PathVariable Long id,  @PageableDefault(size = 10, sort = "titre") Pageable pageable) {
-        Page<LivreResponse> livres = auteurService.recupererParLivreId(id, pageable);
-        return ResponseEntity.ok(new PagedModel<>(livres));
-
+    public ResponseEntity<PagedModel<LivreResponse>> listerLivres(
+            @PathVariable Long id,
+            @PageableDefault(size = 10, sort = "titre") Pageable pageable) {
+        try {
+            Page<LivreResponse> livres = auteurService.recupererParLivreId(id, pageable);
+            return ResponseEntity.ok(new PagedModel<>(livres));
+        } catch (EntityNotFoundException exception) {
+            return ResponseEntity.notFound().build();
+        }
     }
 
     @PostMapping
@@ -60,16 +64,22 @@ public class AuteurController {
     @PutMapping("/{id}")
     public ResponseEntity<AuteurResponse> mettreAJour(@PathVariable Long id,
             @Valid @RequestBody AuteurRequest request) {
-        return auteurService.mettreAJour(id, request)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+        try {
+            return ResponseEntity.ok(auteurService.mettreAJour(id, request));
+        } catch (EntityNotFoundException exception) {
+            return ResponseEntity.notFound().build();
+        }
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> supprimer(@PathVariable Long id) {
-        if (auteurService.supprimer(id)) {
+        try {
+            auteurService.supprimer(id);
             return ResponseEntity.noContent().build();
+        } catch (EntityNotFoundException exception) {
+            return ResponseEntity.notFound().build();
+        } catch (DataIntegrityViolationException exception) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).build();
         }
-        return ResponseEntity.notFound().build();
     }
 }

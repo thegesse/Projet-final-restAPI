@@ -14,7 +14,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class AuteurService {
@@ -36,12 +35,16 @@ public class AuteurService {
                 .map(AuteurMapper::versResponse).toList();
     }
 
-    public Optional<AuteurResponse> recupererParId(Long id) {
+    public AuteurResponse recupererParId(Long id) {
         return auteurRepository.findById(id)
-                .map(AuteurMapper::versResponse);
+                .map(AuteurMapper::versResponse)
+                .orElseThrow(() -> new EntityNotFoundException("Auteur non trouvé"));
     }
 
     public Page<LivreResponse> recupererParLivreId(Long id, Pageable pageable) {
+        if (!auteurRepository.existsById(id)) {
+            throw new EntityNotFoundException("Auteur non trouvé");
+        }
         return livreRepository.findByAuteurId(id, pageable)
                 .map(LivreMapper::versResponse);
     }
@@ -52,7 +55,7 @@ public class AuteurService {
         return auteurMapper.versResponse(entiteCree);
     }
 
-    public Optional<AuteurResponse> mettreAJour(Long id, AuteurRequest request) {
+    public AuteurResponse mettreAJour(Long id, AuteurRequest request) {
         return auteurRepository.findById(id)
                 .map(auteurExistant -> {
                     auteurExistant.setNom(request.getNom());
@@ -61,15 +64,15 @@ public class AuteurService {
 
                     Auteur auteurModifie = auteurRepository.save(auteurExistant);
                     return auteurMapper.versResponse(auteurModifie);
-                });
+                })
+                .orElseThrow(() -> new EntityNotFoundException("Auteur non trouvé"));
     }
 
-    public boolean supprimer(Long id) {
+    public void supprimer(Long id) {
         if (!auteurRepository.existsById(id)) {
-            return false;
+            throw new EntityNotFoundException("Auteur non trouvé");
         }
 
         auteurRepository.deleteById(id);
-        return true;
     }
 }
