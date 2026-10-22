@@ -36,12 +36,12 @@ public class AuteurController {
     }
 
     @GetMapping("/{id}/livres")
-    public ResponseEntity<List<LivreResponse>> obtenirLivresParAuteur(@PathVariable Long id) {
-        List<LivreResponse> livres = livreService.recupererParAuteur(id)
-                .stream()
-                .map(livreMapper::versResponse)
-                .toList();
-        return ResponseEntity.ok(livres);
+    public ResponseEntity<List<LivreResponse>> listerLivres(@PathVariable Long id) {
+        return auteurService.recupererParLivreId(id)
+                .map(LivreMapper::versResponse)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+
     }
 
     @PostMapping
