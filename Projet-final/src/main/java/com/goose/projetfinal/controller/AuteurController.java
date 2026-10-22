@@ -1,5 +1,9 @@
 package com.goose.projetfinal.controller;
 
+import com.goose.projetfinal.dto.AuteurRequest;
+import com.goose.projetfinal.dto.AuteurResponse;
+import com.goose.projetfinal.mapper.AuteurMapper;
+import com.goose.projetfinal.model.Auteur;
 import com.goose.projetfinal.service.AuteurService;
 import jakarta.validation.Valid;
 import java.util.List;
@@ -12,9 +16,11 @@ import org.springframework.web.bind.annotation.*;
 public class AuteurController {
 
     private final AuteurService auteurService;
+    private final AuteurMapper auteurMapper;
 
-    public AuteurController(AuteurService auteurService) {
+    public AuteurController(AuteurService auteurService, AuteurMapper auteurMapper) {
         this.auteurService = auteurService;
+        this.auteurMapper = auteurMapper;
     }
 
     // Écrivez ici les méthodes des endpoints 1 à 5
@@ -23,7 +29,7 @@ public class AuteurController {
         List<AuteurResponse> auteur = auteurService.recupererTous()
             .stream()
             .map(auteurMapper::versResponse)
-            .toList
+            .toList;
         return ResponseEntity.ok(auteur);
     }
 
