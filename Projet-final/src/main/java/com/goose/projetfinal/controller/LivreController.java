@@ -28,4 +28,12 @@ public class LivreController {
         return ResponseEntity.ok(livre);
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<LivreResponse> obtenirParId(@PathVariable Long id) {
+        return livreService.recupererParId(id)
+                .map(livreMapper::versResponse)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
 }
