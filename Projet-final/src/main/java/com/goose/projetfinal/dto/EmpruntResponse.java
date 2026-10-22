@@ -1,22 +1,27 @@
 package com.goose.projetfinal.dto;
 
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-@Data
-@NoArgsConstructor
+import java.time.LocalDate;
+
+@Getter
+@AllArgsConstructor
+@JsonPropertyOrder({"id", "livreId", "emprunteur", "dateEmprunt", "dateRetourPrevue", "dateRetourEffective", "rendu", "enRetard"})
 public class EmpruntResponse {
-    @NotNull(message = "L'id du livre est obligatoire")
-    @Positive(message = "l'ID du l'ivre doit etre positive")
-    private Long livreId;
-    @NotBlank(message = "L'emprunteur est obligatoire")
-    @Size(max = 100, message = "L'empreteur ne doit pas depasser les 100 caracteres")
-    private String emprunteur;
-    @NotBlank(message = "L'email de l'emprunteur doit etre present")
-    @Size(max = 100, message = "L'email de l'emprunteur ne doit pas depasser les 100 caracteres")
-    private String emailEmprunteur;
+    private final Long id;
+    private final Long livreId;
+    private final String emprunteur;
+    private final LocalDate dateEmprunt;
+    private final LocalDate dateRetourPrevue;
+    private final LocalDate dateRetourEffective;
+    private final Boolean rendu;
+    private final Boolean enRetard;
 }
