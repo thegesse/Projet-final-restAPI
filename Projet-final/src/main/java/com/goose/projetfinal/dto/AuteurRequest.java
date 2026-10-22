@@ -1,4 +1,4 @@
-package com.goose.projetfinal.Dto;
+package com.goose.projetfinal.dto;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;

@@ -1,4 +1,4 @@
-package com.goose.projetfinal.Dto;
+package com.goose.projetfinal.dto;
 
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import lombok.AllArgsConstructor;
