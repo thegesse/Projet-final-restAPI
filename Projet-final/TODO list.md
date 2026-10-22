@@ -4,9 +4,9 @@ Travail restant d'après `05-Projet-Fil-Rouge-v3.pdf` (la configuration du proje
 
 ## Sprint 1 — Auteurs
 
-- [ ] Q12–Q14 : Créer les entités JPA `Auteur`, `Livre` et `Emprunt` avec les attributs et annotations indiqués dans le PDF.
-- [ ] Q17 : Créer les DTO `AuteurRequest` et `AuteurResponse` avec les validations requises et l'ordre des champs JSON.
-- [ ] Q18 : Compléter `AuteurMapper` avec les conversions entité/réponse et la conversion de liste ; conserver la méthode `versPage` fournie.
+- [X] Q12–Q14 : Créer les entités JPA `Auteur`, `Livre` et `Emprunt` avec les attributs et annotations indiqués dans le PDF.
+- [X] Q17 : Créer les DTO `AuteurRequest` et `AuteurResponse` avec les validations requises et l'ordre des champs JSON.
+- [X] Q18 : Compléter `AuteurMapper` avec les conversions entité/réponse et la conversion de liste ; conserver la méthode `versPage` fournie.
 - [ ] Q19 : Implémenter les méthodes de `AuteurService`.
 - [ ] Q20 : Implémenter les endpoints 1 à 5 des auteurs dans `AuteurController`.
 - [ ] Q25 : Ajouter l'endpoint des livres d'un auteur (endpoint 6).
