@@ -84,4 +84,15 @@ public class LivreController {
             return ResponseEntity.badRequest().build();
         }
     }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<LivreResponse> mettreAJour(@PathVariable Long id, @Valid @RequestBody LivreRequest request) {
+        Livre entiteModifiee = livreMapper.versEntite(request);
+
+        return livreService.mettreAJour(id, entiteModifiee)
+                .map(livreMapper::versResponse)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
 }
