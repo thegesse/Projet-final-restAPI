@@ -1,11 +1,15 @@
 package com.goose.projetfinal.service;
 
+import com.goose.projetfinal.model.Emprunt;
+import com.goose.projetfinal.model.Livre;
 import com.goose.projetfinal.repository.EmpruntRepository;
 import com.goose.projetfinal.repository.LivreRepository;
-
-import java.util.stream.Collectors;
-
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+
+import java.time.LocalDate;
+import java.util.Optional;
 
 @Service
 public class EmpruntService {
@@ -21,78 +25,59 @@ public class EmpruntService {
         this.livreRepository = livreRepository;
     }
 
-    // Écrivez ici les méthodes du tableau
-    public List<EmpruntResponse> recupererTous() {
-        return empruntRepository.findAll()
-                .stream()
-                .map(EmpruntMapper::versReponse).toList();
+    public Page<Emprunt> recupererTous(Pageable pageable) {
+        return empruntRepository.findAll(pageable);
     }
 
-    public List<EmpruntResponse> enRetard() {
-        return empruntRepository.findEnRetard()
-                .stream()
-                .map(EmpruntMapper::versReponse)
-                .toList();
+    public Optional<Emprunt> recupererParId(Long id) {
+        return empruntRepository.findById(id);
     }
 
-    public List<EmpruntResponse> enCours() {
-        return empruntRepository.findEnCours()
-                .stream()
-                .map(EmpruntMapper::versReponse)
-                .toList();
+    public boolean livreExiste(Long livreId) {
+        return livreRepository.existsById(livreId);
     }
 
-    public EmpruntResponse recupererParId(long id) {
-        return empruntRepository.findById(id)
-                .map(EmpruntMapper::versReponse)
-                .orElseThrow(() -> new RuntimeException("Emprunt non trouvé"));
+    public boolean livreDisponible(Long livreId) {
+        Optional<Livre> livre = livreRepository.findById(livreId);
+        return livre.isPresent() && livre.get().getStock() > 0;
     }
 
-    public EmpruntResponse retourner(long id) {
-        Emprunt emprunt = empruntRepository.findById(id).orElseThrow(() -> new RuntimeException("Emprunt non trouvé"));
-        emprunt.setDisponible(true);
-        return EmpruntMapper.versReponse(empruntRepository.save(emprunt));
-    }
+    public Emprunt creer(Emprunt emprunt) {
+        emprunt.setId(null);
+        emprunt.setDateEmprunt(LocalDate.now());
+        emprunt.setDateRetourPrevue(LocalDate.now().plusDays(DUREE_MAX_JOURS));
+        emprunt.setDateRetourEffective(null);
+        emprunt.setRendu(false);
 
-    public EmpruntResponse enCoursParLivreId(long livreId) {
-        return empruntRepository.findEnCoursByLivreId(livreId)
-                .map(EmpruntMapper::versReponse)
-                .orElseThrow(() -> new RuntimeException("Emprunt non trouvé"));
-    }
-
-    public EmpruntResponse enRetardParLivreId(long livreId) {
-        return empruntRepository.findEnRetardByLivreId(livreId)
-                .map(EmpruntMapper::versReponse)
-                .orElseThrow(() -> new RuntimeException("Emprunt non trouvé"));
-    }
-
-    public EmpruntResponse creer(EmpruntRequest request) {
-        Emprunt entiteACreer = EmpruntMapper.versEntite(request);
-        Emprunt entiteCree = empruntRepository.save(entiteACreer);
-        return EmpruntMapper.versReponse(entiteCree);
-    }
-
-    public EmpruntResponse miseAJour(long id, EmpruntRequest request) {
-        return EmpruntRepository.findById(id)
-            .map(empruntExistant -> {
-                empruntExistant.setLivreId(request.getLivreId());
-                empruntExistant.setEmprunteur(request.getEmprunteur());
-                empruntExistant.setEmailEmprunteur(request.getEmailEmprunteur());
-                empruntExistant.setDateEmprunt(request.getDateEmprunt());
-                empruntExistant.setDateRetourPrevue(request.getDateRetourPrevue());
-                empruntExistant.setDateRetourEffective(request.getDateRetourEffective());
-                empruntExistant.setRendu(request.getRendu());
-
-                Emprunt empruntModifie = empruntRepository.save(empruntExistant);
-                return EmpruntMapper.versReponse(empruntModifie);
-            })
-            .orElseThrow(() -> new RuntimeException("Emprunt non trouvé"));
-
-    public void supprimer(long id) {
-        if (!empruntRepository.existsById(id)) {
-            throw new RuntimeException("Emprunt non trouvé");
+        Optional<Livre> livreOpt = livreRepository.findById(emprunt.getLivreId());
+        if (livreOpt.isPresent()) {
+            Livre livre = livreOpt.get();
+            livre.setStock(livre.getStock() - 1);
+            livreRepository.save(livre);
         }
-        empruntRepository.deleteById(id);
+
+        return empruntRepository.save(emprunt);
     }
 
+    public Emprunt retourner(Emprunt emprunt) {
+        emprunt.setRendu(true);
+        emprunt.setDateRetourEffective(LocalDate.now());
+
+        Optional<Livre> livreOpt = livreRepository.findById(emprunt.getLivreId());
+        if (livreOpt.isPresent()) {
+            Livre livre = livreOpt.get();
+            livre.setStock(livre.getStock() + 1);
+            livreRepository.save(livre);
+        }
+
+        return empruntRepository.save(emprunt);
+    }
+
+    public Page<Emprunt> recupererEnCours(Pageable pageable) {
+        return empruntRepository.findByRenduFalse(pageable);
+    }
+
+    public Page<Emprunt> recupererEnRetard(Pageable pageable) {
+        return empruntRepository.findByRenduFalseAndDateRetourPrevueBefore(LocalDate.now(), pageable);
+    }
 }

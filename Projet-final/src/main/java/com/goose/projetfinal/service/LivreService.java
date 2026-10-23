@@ -1,6 +1,13 @@
+package com.goose.projetfinal.service;
+
+import com.goose.projetfinal.model.Livre;
 import com.goose.projetfinal.repository.AuteurRepository;
 import com.goose.projetfinal.repository.LivreRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+
+import java.util.Optional;
 
 @Service
 public class LivreService {
@@ -13,45 +20,63 @@ public class LivreService {
         this.auteurRepository = auteurRepository;
     }
 
-    // Écrivez ici les méthodes du tableau
-    public List<Livre> recupererTous() {
-        return livreRepository.findAll();
+    public Page<Livre> recupererTous(Pageable pageable) {
+        return livreRepository.findAll(pageable);
     }
 
     public Optional<Livre> recupererParId(Long id) {
         return livreRepository.findById(id);
     }
 
-    public Optional<List<Livre>> recupererParAuteurId(Long id) {
-        return livreRepository.findByAuteurId(id);
+    public boolean existe(Long id) {
+        return livreRepository.existsById(id);
+    }
+
+    public boolean auteurExiste(Long auteurId) {
+        return auteurRepository.existsById(auteurId);
+    }
+
+    public boolean isbnExiste(String isbn) {
+        return livreRepository.findByIsbn(isbn).isPresent();
+    }
+
+    public boolean isbnUtiliseParUnAutreLivre(String isbn, Long idLivre) {
+        Optional<Livre> livre = livreRepository.findByIsbn(isbn);
+        if (livre.isEmpty()) {
+            return false;
+        }
+        return !livre.get().getId().equals(idLivre);
     }
 
     public Livre creer(Livre livre) {
+        livre.setId(null);
         return livreRepository.save(livre);
     }
 
-    public Livre mettreAJour(Long id, Livre livre) {
-        return livreRepository.findById(id)
-                .map(livreExistant -> {
-                    livreExistant.setTitre(livre.getTitre());
-                    livreExistant.setIsbn(livre.getIsbn());
-                    livreExistant.setPrix(livre.getPrix());
-                    livreExistant.setAnneePublication(livre.getAnneePublication());
-                    livreExistant.setStock(livre.getStock());
-                    livreExistant.setAuteurId(livre.getAuteurId());
-                    return livreRepository.save(livreExistant);
-                })
-                .orElseThrow(() -> new EntityNotFoundException("Livre non trouvé"));
+    public Livre mettreAJour(Livre livreExistant, Livre nouvellesValeurs) {
+        livreExistant.setTitre(nouvellesValeurs.getTitre());
+        livreExistant.setIsbn(nouvellesValeurs.getIsbn());
+        livreExistant.setPrix(nouvellesValeurs.getPrix());
+        livreExistant.setAnneePublication(nouvellesValeurs.getAnneePublication());
+        livreExistant.setStock(nouvellesValeurs.getStock());
+        livreExistant.setAuteurId(nouvellesValeurs.getAuteurId());
+        return livreRepository.save(livreExistant);
     }
 
-    public boolean supprimer(Long id) {
-        if (livreRepository.existsById(id)) {
-            livreRepository.deleteById(id);
-            return true;
-        } else {
-            return false;
-        }
+    public void supprimer(Long id) {
+        livreRepository.deleteById(id);
     }
-}
 
+    public Page<Livre> rechercherParTitre(String titre, Pageable pageable) {
+        return livreRepository.findByTitreContainingIgnoreCase(titre, pageable);
+    }
+
+    public Page<Livre> recupererDisponibles(Pageable pageable) {
+        return livreRepository.findByStockGreaterThan(0, pageable);
+    }
+
+    public Livre ajouterStock(Livre livre, Integer quantite) {
+        livre.setStock(livre.getStock() + quantite);
+        return livreRepository.save(livre);
+    }
 }
