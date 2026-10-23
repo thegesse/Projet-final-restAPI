@@ -49,4 +49,10 @@ public class EmpruntController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
+    @PatchMapping("/{id}/retour")
+    public ResponseEntity<EmpruntResponse> retour(@PathVariable Long id) {
+        EmpruntResponse response = empruntService.retour(id);
+        return ResponseEntity.ok(response);
+    }
+
 }
