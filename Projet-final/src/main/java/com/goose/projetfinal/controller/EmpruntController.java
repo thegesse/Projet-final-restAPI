@@ -42,4 +42,11 @@ public class EmpruntController {
         List<EmpruntResponse> emprunt = empruntService.recupererEmpruntsEnRetard();
         return ResponseEntity.ok(emprunt);
     }
+
+    @PostMapping
+    public ResponseEntity<EmpruntResponse> creer(@Valid @RequestBody EmpruntRequest request) {
+        EmpruntResponse response = empruntService.creer(request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
 }
