@@ -1,11 +1,9 @@
 package com.goose.projetfinal.controller;
 
 import com.goose.projetfinal.service.EmpruntService;
-
+import java.util.List;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/v1/emprunts")
@@ -31,6 +29,12 @@ public class EmpruntController {
         } catch (EntityNotFoundException exception){
             return ResponseEntity.notFound().build();
         }
+    }
+
+    @GetMapping("/en-cours")
+    public ResponseEntity<List<EmpruntResponse>> listerEnCours() {
+        List<EmpruntResponse> emprunt = empruntService.recupererEmpruntsEnCours();
+        return ResponseEntity.ok(emprunt);
     }
 
 }
