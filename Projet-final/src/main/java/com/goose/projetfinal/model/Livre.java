@@ -22,10 +22,10 @@ public class Livre {
     private String isbn;
 
     @Column(nullable = false)
-    private double prix;
+    private Double prix;
 
     @Column
-    private int anneePublication;
+    private Integer anneePublication;
 
     @Column(nullable = false)
     private Integer stock;

@@ -1,16 +1,21 @@
 package com.goose.projetfinal.service;
 
+import com.goose.projetfinal.model.Emprunt;
+import com.goose.projetfinal.model.Livre;
 import com.goose.projetfinal.repository.EmpruntRepository;
 import com.goose.projetfinal.repository.LivreRepository;
-
-import java.util.stream.Collectors;
-
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
+
+import java.time.LocalDate;
+import java.util.Optional;
 
 @Service
 public class EmpruntService {
 
-    /** Durée maximale d'un emprunt, en jours (RM5). */
     public static final int DUREE_MAX_JOURS = 14;
 
     private final EmpruntRepository empruntRepository;
@@ -21,78 +26,74 @@ public class EmpruntService {
         this.livreRepository = livreRepository;
     }
 
-    // Écrivez ici les méthodes du tableau
-    public List<EmpruntResponse> recupererTous() {
-        return empruntRepository.findAll()
-                .stream()
-                .map(EmpruntMapper::versReponse).toList();
+    public Page<Emprunt> recupererTous(Pageable pageable) {
+        return empruntRepository.findAll(pageable);
     }
 
-    public List<EmpruntResponse> enRetard() {
-        return empruntRepository.findEnRetard()
-                .stream()
-                .map(EmpruntMapper::versReponse)
-                .toList();
+    public Optional<Emprunt> recupererParId(Long id) {
+        return empruntRepository.findById(id);
     }
 
-    public List<EmpruntResponse> enCours() {
-        return empruntRepository.findEnCours()
-                .stream()
-                .map(EmpruntMapper::versReponse)
-                .toList();
-    }
-
-    public EmpruntResponse recupererParId(long id) {
+    public Emprunt obtenirParId(Long id) {
         return empruntRepository.findById(id)
-                .map(EmpruntMapper::versReponse)
-                .orElseThrow(() -> new RuntimeException("Emprunt non trouvé"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Emprunt inexistant"));
     }
 
-    public EmpruntResponse retourner(long id) {
-        Emprunt emprunt = empruntRepository.findById(id).orElseThrow(() -> new RuntimeException("Emprunt non trouvé"));
-        emprunt.setDisponible(true);
-        return EmpruntMapper.versReponse(empruntRepository.save(emprunt));
+    public boolean livreExiste(Long livreId) {
+        return livreRepository.existsById(livreId);
     }
 
-    public EmpruntResponse enCoursParLivreId(long livreId) {
-        return empruntRepository.findEnCoursByLivreId(livreId)
-                .map(EmpruntMapper::versReponse)
-                .orElseThrow(() -> new RuntimeException("Emprunt non trouvé"));
+    public boolean livreDisponible(Long livreId) {
+        return livreRepository.findById(livreId)
+                .map(livre -> livre.getStock() != null && livre.getStock() > 0)
+                .orElse(false);
     }
 
-    public EmpruntResponse enRetardParLivreId(long livreId) {
-        return empruntRepository.findEnRetardByLivreId(livreId)
-                .map(EmpruntMapper::versReponse)
-                .orElseThrow(() -> new RuntimeException("Emprunt non trouvé"));
-    }
 
-    public EmpruntResponse creer(EmpruntRequest request) {
-        Emprunt entiteACreer = EmpruntMapper.versEntite(request);
-        Emprunt entiteCree = empruntRepository.save(entiteACreer);
-        return EmpruntMapper.versReponse(entiteCree);
-    }
-
-    public EmpruntResponse miseAJour(long id, EmpruntRequest request) {
-        return EmpruntRepository.findById(id)
-            .map(empruntExistant -> {
-                empruntExistant.setLivreId(request.getLivreId());
-                empruntExistant.setEmprunteur(request.getEmprunteur());
-                empruntExistant.setEmailEmprunteur(request.getEmailEmprunteur());
-                empruntExistant.setDateEmprunt(request.getDateEmprunt());
-                empruntExistant.setDateRetourPrevue(request.getDateRetourPrevue());
-                empruntExistant.setDateRetourEffective(request.getDateRetourEffective());
-                empruntExistant.setRendu(request.getRendu());
-
-                Emprunt empruntModifie = empruntRepository.save(empruntExistant);
-                return EmpruntMapper.versReponse(empruntModifie);
-            })
-            .orElseThrow(() -> new RuntimeException("Emprunt non trouvé"));
-
-    public void supprimer(long id) {
-        if (!empruntRepository.existsById(id)) {
-            throw new RuntimeException("Emprunt non trouvé");
+    public Emprunt creer(Emprunt emprunt) {
+        Long livreId = emprunt.getLivreId();
+        if (!livreExiste(livreId)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Le livre n'existe pas");
         }
-        empruntRepository.deleteById(id);
+        if (!livreDisponible(livreId)) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Le livre n'est pas disponible");
+        }
+
+        Livre livre = livreRepository.findById(livreId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Le livre n'existe pas"));
+        LocalDate aujourdHui = LocalDate.now();
+        emprunt.setId(null);
+        emprunt.setDateEmprunt(aujourdHui);
+        emprunt.setDateRetourPrevue(aujourdHui.plusDays(DUREE_MAX_JOURS));
+        emprunt.setDateRetourEffective(null);
+        emprunt.setRendu(false);
+        livre.setStock(livre.getStock() - 1);
+        livreRepository.save(livre);
+        return empruntRepository.save(emprunt);
+    }
+
+    public Emprunt retourner(Long id) {
+        Emprunt emprunt = empruntRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Emprunt inexistant"));
+        if (Boolean.TRUE.equals(emprunt.getRendu())) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "L'emprunt est déjà rendu");
+        }
+        emprunt.setRendu(true);
+        emprunt.setDateRetourEffective(LocalDate.now());
+
+        livreRepository.findById(emprunt.getLivreId()).ifPresent(livre -> {
+            livre.setStock(livre.getStock() + 1);
+            livreRepository.save(livre);
+        });
+        return empruntRepository.save(emprunt);
+    }
+
+    public Page<Emprunt> recupererEnCours(Pageable pageable) {
+        return empruntRepository.findByRenduFalse(pageable);
+    }
+
+    public Page<Emprunt> recupererEnRetard(Pageable pageable) {
+        return empruntRepository.findByRenduFalseAndDateRetourPrevueBefore(LocalDate.now(), pageable);
     }
 
 }
