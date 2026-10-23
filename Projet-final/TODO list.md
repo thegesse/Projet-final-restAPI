@@ -25,14 +25,14 @@ Travail restant d'après `05-Projet-Fil-Rouge-v3.pdf` (la configuration du proje
 
 ## Sprint 3 — Documentation et client
 
-- [ ] Q31 : Ajouter les tags Swagger, les résumés des opérations et la documentation des réponses aux 20 endpoints.
+- [X] Q31 : Ajouter les tags Swagger, les résumés des opérations et la documentation des réponses aux 20 endpoints.
 - [ ] Q32 : Créer la collection Postman contenant les 46 requêtes de recette ou préparer `RECETTE.pdf` avec les résultats de leur exécution.
-- [ ] Q33 : Créer `client/ClientBibliotheque.java` avec Java `HttpClient` et réaliser le scénario demandé en 10 étapes.
+- [X] Q33 : Créer `client/ClientBibliotheque.java` avec Java `HttpClient` et réaliser le scénario demandé en 10 étapes.
 
 ## Livrables finaux
 
 - [ ] Ajouter `CONCEPTION.pdf` avec les réponses aux questions Q1 à Q9.
 - [ ] Exécuter les 46 requêtes Postman dans l'ordre sur une API fraîchement redémarrée et corriger les écarts.
-- [ ] Vérifier que Swagger UI affiche les trois groupes de ressources et les 20 endpoints.
-- [ ] Vérifier que le client Java affiche un bilan de 10/10 étapes conformes.
+- [X] Vérifier que Swagger UI affiche les trois groupes de ressources et les 20 endpoints.
+- [X] Vérifier que le client Java affiche un bilan de 10/10 étapes conformes.
 - [ ] Préparer l'archive de rendu sans le dossier `target/`.

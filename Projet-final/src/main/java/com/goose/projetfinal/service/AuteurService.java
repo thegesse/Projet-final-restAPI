@@ -4,7 +4,6 @@ import com.goose.projetfinal.model.Auteur;
 import com.goose.projetfinal.model.Livre;
 import com.goose.projetfinal.repository.AuteurRepository;
 import com.goose.projetfinal.repository.LivreRepository;
-import jakarta.persistence.EntityNotFoundException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;

@@ -1,5 +1,6 @@
 HELP.md
 target/
+*.class
 .agents/
 .codex/
 .mvn/wrapper/maven-wrapper.jar

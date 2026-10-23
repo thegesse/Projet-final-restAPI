@@ -1,14 +1,18 @@
-package  com.goose.projetfinal.service;
+package com.goose.projetfinal.service;
 
 import com.goose.projetfinal.model.Livre;
 import com.goose.projetfinal.repository.AuteurRepository;
 import com.goose.projetfinal.repository.LivreRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
+
+import java.util.Optional;
 
 import java.util.Optional;
 

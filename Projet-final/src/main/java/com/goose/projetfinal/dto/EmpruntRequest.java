@@ -1,24 +1,22 @@
 package com.goose.projetfinal.dto;
 
-import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import jakarta.validation.constraints.*;
-import lombok.AllArgsConstructor;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.Data;
-import lombok.Getter;
 import lombok.NoArgsConstructor;
-
-import java.time.LocalDate;
-import java.time.LocalDateTime;
 @Data
 @NoArgsConstructor
 public class EmpruntRequest {
-    @NotNull(message = "L'id du livre est obligatoire")
+    @NotNull(message = "L'identifiant du livre est obligatoire")
     private Long livreId;
-    @NotBlank(message = "L'emprunteur est obligatoire")
-    @Size(max = 100, message = "L'empreteur ne doit pas depasser les 100 caracteres")
+
+    @NotBlank(message = "Le nom de l'emprunteur est obligatoire")
+    @Size(max = 100, message = "Le nom de l'emprunteur ne doit pas dépasser 100 caractères")
     private String emprunteur;
-    @NotBlank(message = "L'email de l'emprunteur doit etre present")
-    @Size(max = 100, message = "L'email de l'emprunteur ne doit pas depasser les 100 caracteres")
-    @Email
+
+    @NotBlank(message = "L'email est obligatoire")
+    @Email(message = "L'email doit être valide")
     private String emailEmprunteur;
 }

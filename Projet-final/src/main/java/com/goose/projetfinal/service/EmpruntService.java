@@ -13,6 +13,9 @@ import org.springframework.web.server.ResponseStatusException;
 import java.time.LocalDate;
 import java.util.Optional;
 
+import java.time.LocalDate;
+import java.util.Optional;
+
 @Service
 public class EmpruntService {
 
@@ -96,4 +99,7 @@ public class EmpruntService {
         return empruntRepository.findByRenduFalseAndDateRetourPrevueBefore(LocalDate.now(), pageable);
     }
 
+    public Page<Emprunt> recupererEnRetard(Pageable pageable) {
+        return empruntRepository.findByRenduFalseAndDateRetourPrevueBefore(LocalDate.now(), pageable);
+    }
 }
