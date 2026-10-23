@@ -16,12 +16,12 @@ Travail restant d'après `05-Projet-Fil-Rouge-v3.pdf` (la configuration du proje
 
 - [X] Q21 : Créer les DTO `LivreRequest` et `LivreResponse` avec les validations et l'ordre des champs JSON.
 - [X] Q22 : Créer `LivreMapper` et compléter les conversions des livres.
-- [ ] Q23 : Implémenter les méthodes de `LivreService`.
+- [X] Q23 : Implémenter les méthodes de `LivreService`.
 - [X] Q24 : Implémenter les endpoints 7 à 14 des livres dans `LivreController`.
 - [X] Q26 : Créer les DTO `EmpruntRequest` et `EmpruntResponse` ; ne pas inclure l'adresse e-mail de l'emprunteur dans les réponses.
 - [X] Q27 : Créer `EmpruntMapper` avec les conversions demandées et le calcul des retards.
-- [ ] Q28 : Implémenter les méthodes de `EmpruntService`.
-- [ ] Q29 : Implémenter les endpoints 15 à 20 des emprunts dans `EmpruntController`.
+- [X] Q28 : Implémenter les méthodes de `EmpruntService`.
+- [X] Q29 : Implémenter les endpoints 15 à 20 des emprunts dans `EmpruntController`.
 
 ## Sprint 3 — Documentation et client
 
