@@ -66,7 +66,7 @@ public class LivreController {
     }
 
     @PatchMapping("/{id}/stock")
-    public ResponseEntity<LivreResponse> ajouterStock(@PathVariable Long id, @Valid @RequestBody Integer quantite) {
+    public ResponseEntity<LivreResponse> ajouterStock(@PathVariable Long id, @RequestParam Integer quantite) {
         Livre livre = livreService.recupererParId(id);
         Livre livreModifie = livreService.ajouterStock(livre, quantite);
         return ResponseEntity.ok(LivreMapper.versResponse(livreModifie));
