@@ -37,4 +37,9 @@ public class EmpruntController {
         return ResponseEntity.ok(emprunt);
     }
 
+    @GetMapping("/en-retard")
+    public ResponseEntity<List<EmpruntResponse>> listerEnRetard() {
+        List<EmpruntResponse> emprunt = empruntService.recupererEmpruntsEnRetard();
+        return ResponseEntity.ok(emprunt);
+    }
 }
