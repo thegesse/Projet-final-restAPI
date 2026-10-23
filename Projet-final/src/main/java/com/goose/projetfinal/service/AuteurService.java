@@ -29,6 +29,11 @@ public class AuteurService {
         return auteurRepository.findById(id);
     }
 
+    public Auteur obtenirParId(Long id) {
+        return auteurRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Auteur non trouvé"));
+    }
+
     public boolean existe(Long id) {
         return auteurRepository.existsById(id);
     }
@@ -38,7 +43,8 @@ public class AuteurService {
         return auteurRepository.save(auteur);
     }
 
-    public Auteur mettreAJour(Auteur auteurExistant, Auteur nouvellesValeurs) {
+    public Auteur mettreAJour(Long id, Auteur nouvellesValeurs) {
+        Auteur auteurExistant = obtenirParId(id);
         auteurExistant.setNom(nouvellesValeurs.getNom());
         auteurExistant.setPrenom(nouvellesValeurs.getPrenom());
         auteurExistant.setNationalite(nouvellesValeurs.getNationalite());
@@ -50,10 +56,25 @@ public class AuteurService {
     }
 
     public void supprimer(Long id) {
+        if (!auteurRepository.existsById(id)) {
+            throw new EntityNotFoundException("Auteur non trouvé");
+        }
+        if (aDesLivres(id)) {
+            throw new AuteurAvecLivresException();
+        }
         auteurRepository.deleteById(id);
     }
 
     public Page<Livre> recupererLivres(Long id, Pageable pageable) {
+        if (!auteurRepository.existsById(id)) {
+            throw new EntityNotFoundException("Auteur non trouvé");
+        }
         return livreRepository.findByAuteurId(id, pageable);
+    }
+
+    public static class AuteurAvecLivresException extends RuntimeException {
+        public AuteurAvecLivresException() {
+            super("L'auteur a encore des livres");
+        }
     }
 }

@@ -20,6 +20,14 @@ import org.springframework.data.web.PagedModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Optional;
 
@@ -54,8 +62,9 @@ public class AuteurController {
     })
     @GetMapping("/{id}")
     public ResponseEntity<AuteurResponse> obtenirParId(@PathVariable Long id) {
-        Optional<Auteur> resultat = auteurService.recupererParId(id);
-        if (resultat.isEmpty()) {
+        try {
+            return ResponseEntity.ok(AuteurMapper.versResponse(auteurService.obtenirParId(id)));
+        } catch (jakarta.persistence.EntityNotFoundException exception) {
             return ResponseEntity.notFound().build();
         }
         return ResponseEntity.ok(AuteurMapper.versResponse(resultat.get()));
@@ -69,9 +78,10 @@ public class AuteurController {
     })
     @PostMapping
     public ResponseEntity<AuteurResponse> creer(@Valid @RequestBody AuteurRequest request) {
-        Auteur entite = AuteurMapper.versEntite(request);
-        Auteur auteurCree = auteurService.creer(entite);
-        return ResponseEntity.status(HttpStatus.CREATED).body(AuteurMapper.versResponse(auteurCree));
+        Auteur auteur = AuteurMapper.versEntite(request);
+        Auteur auteurCree = auteurService.creer(auteur);
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(AuteurMapper.versResponse(auteurCree));
     }
 
     // Endpoint 4 — PUT /api/v1/auteurs/{id}
@@ -82,9 +92,13 @@ public class AuteurController {
             @ApiResponse(responseCode = "404", description = "Auteur inexistant")
     })
     @PutMapping("/{id}")
-    public ResponseEntity<AuteurResponse> mettreAJour(@PathVariable Long id, @Valid @RequestBody AuteurRequest request) {
-        Optional<Auteur> resultat = auteurService.recupererParId(id);
-        if (resultat.isEmpty()) {
+    public ResponseEntity<AuteurResponse> mettreAJour(@PathVariable Long id,
+                                                       @Valid @RequestBody AuteurRequest request) {
+        try {
+            Auteur nouvellesValeurs = AuteurMapper.versEntite(request);
+            Auteur auteurModifie = auteurService.mettreAJour(id, nouvellesValeurs);
+            return ResponseEntity.ok(AuteurMapper.versResponse(auteurModifie));
+        } catch (jakarta.persistence.EntityNotFoundException exception) {
             return ResponseEntity.notFound().build();
         }
         Auteur nouvellesValeurs = AuteurMapper.versEntite(request);
@@ -101,10 +115,12 @@ public class AuteurController {
     })
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> supprimer(@PathVariable Long id) {
-        if (!auteurService.existe(id)) {
+        try {
+            auteurService.supprimer(id);
+            return ResponseEntity.noContent().build();
+        } catch (jakarta.persistence.EntityNotFoundException exception) {
             return ResponseEntity.notFound().build();
-        }
-        if (auteurService.aDesLivres(id)) {
+        } catch (AuteurService.AuteurAvecLivresException exception) {
             return ResponseEntity.status(HttpStatus.CONFLICT).build();
         }
         auteurService.supprimer(id);
@@ -126,5 +142,17 @@ public class AuteurController {
         }
         Page<Livre> page = auteurService.recupererLivres(id, pageable);
         return ResponseEntity.ok(LivreMapper.versPage(page));
+    }
+
+    @GetMapping("/{id}/livres")
+    public ResponseEntity<PagedModel<LivreResponse>> listerLivres(
+            @PathVariable Long id,
+            @PageableDefault(size = 10, sort = "titre") Pageable pageable) {
+        try {
+            Page<Livre> page = auteurService.recupererLivres(id, pageable);
+            return ResponseEntity.ok(LivreMapper.versPage(page));
+        } catch (jakarta.persistence.EntityNotFoundException exception) {
+            return ResponseEntity.notFound().build();
+        }
     }
 }
