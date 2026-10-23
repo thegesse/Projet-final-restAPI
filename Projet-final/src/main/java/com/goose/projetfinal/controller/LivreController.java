@@ -12,21 +12,20 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-
-import jakarta.persistence.EntityNotFoundException;
-import jakarta.validation.Valid;
-import org.springframework.data.domain.Page;
-import org.springframework.web.bind.annotation.*;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.data.web.PagedModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
-import org.springframework.data.domain.Pageable;
-import java.util.List;
-
-import java.util.Optional;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 @Tag(name = "Livres", description = "Catalogue des livres")
 @RestController
@@ -39,7 +38,6 @@ public class LivreController {
         this.livreService = livreService;
     }
 
-    // Endpoint 7 — GET /api/v1/livres
     @Operation(summary = "Lister tous les livres")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Page des livres récupérée")
@@ -51,7 +49,6 @@ public class LivreController {
         return ResponseEntity.ok(LivreMapper.versPage(page));
     }
 
-    // Endpoint 8 — GET /api/v1/livres/{id}
     @Operation(summary = "Obtenir un livre par son identifiant")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Livre trouvé"),
@@ -63,7 +60,47 @@ public class LivreController {
         return ResponseEntity.ok(LivreMapper.versResponse(livre));
     }
 
-    // Endpoint 12 — GET /api/v1/livres/recherche?titre=...
+    @Operation(summary = "Créer un nouveau livre")
+    @ApiResponses({
+            @ApiResponse(responseCode = "201", description = "Livre créé"),
+            @ApiResponse(responseCode = "400", description = "Données invalides ou auteur inexistant"),
+            @ApiResponse(responseCode = "409", description = "ISBN déjà utilisé (RM2)")
+    })
+    @PostMapping
+    public ResponseEntity<LivreResponse> creer(@Valid @RequestBody LivreRequest request) {
+        Livre livre = LivreMapper.versEntite(request);
+        Livre livreCree = livreService.creer(livre);
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(LivreMapper.versResponse(livreCree));
+    }
+
+    @Operation(summary = "Mettre à jour un livre")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Livre mis à jour"),
+            @ApiResponse(responseCode = "400", description = "Données invalides ou auteur inexistant"),
+            @ApiResponse(responseCode = "404", description = "Livre inexistant"),
+            @ApiResponse(responseCode = "409", description = "ISBN déjà utilisé par un autre livre (RM2)")
+    })
+    @PutMapping("/{id}")
+    public ResponseEntity<LivreResponse> mettreAJour(
+            @PathVariable Long id,
+            @Valid @RequestBody LivreRequest request) {
+        Livre nouvellesValeurs = LivreMapper.versEntite(request);
+        Livre livreModifie = livreService.mettreAJour(id, nouvellesValeurs);
+        return ResponseEntity.ok(LivreMapper.versResponse(livreModifie));
+    }
+
+    @Operation(summary = "Supprimer un livre")
+    @ApiResponses({
+            @ApiResponse(responseCode = "204", description = "Livre supprimé"),
+            @ApiResponse(responseCode = "404", description = "Livre inexistant")
+    })
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> supprimer(@PathVariable Long id) {
+        livreService.supprimer(id);
+        return ResponseEntity.noContent().build();
+    }
+
     @Operation(summary = "Rechercher des livres par titre")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Résultats de la recherche paginés"),
@@ -77,7 +114,6 @@ public class LivreController {
         return ResponseEntity.ok(LivreMapper.versPage(page));
     }
 
-    // Endpoint 13 — GET /api/v1/livres/disponibles
     @Operation(summary = "Lister les livres disponibles")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Page des livres disponibles en stock (RM4)")
@@ -87,20 +123,8 @@ public class LivreController {
             @PageableDefault(size = 10, sort = "titre") Pageable pageable) {
         Page<Livre> page = livreService.recupererDisponibles(pageable);
         return ResponseEntity.ok(LivreMapper.versPage(page));
-    public ResponseEntity<PagedModel<LivreResponse>> listerDisponibles(@PageableDefault(size = 10, sort = "titre")Pageable pageable) {
-        Page<Livre> page = livreService.recupererDisponibles(pageable);
-        return ResponseEntity.ok(LivreMapper.versPage(page));
     }
 
-    @PostMapping
-    public ResponseEntity<LivreResponse> creer(@Valid @RequestBody LivreRequest request) {
-        Livre livre = LivreMapper.versEntite(request);
-        Livre livreCree = livreService.creer(livre);
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(LivreMapper.versResponse(livreCree));
-    }
-
-    // Endpoint 14 — PATCH /api/v1/livres/{id}/stock?quantite=...
     @Operation(summary = "Ajouter du stock à un livre (réapprovisionnement)")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Stock mis à jour"),
@@ -108,22 +132,12 @@ public class LivreController {
             @ApiResponse(responseCode = "404", description = "Livre inexistant")
     })
     @PatchMapping("/{id}/stock")
-    public ResponseEntity<LivreResponse> ajouterStock(@PathVariable Long id, @RequestParam Integer quantite) {
+    public ResponseEntity<LivreResponse> ajouterStock(
+            @PathVariable Long id,
+            @RequestParam Integer quantite) {
         Livre livre = livreService.recupererParId(id);
         Livre livreModifie = livreService.ajouterStock(livre, quantite);
         return ResponseEntity.ok(LivreMapper.versResponse(livreModifie));
     }
-
-    @PutMapping("/{id}")
-    public ResponseEntity<LivreResponse> mettreAJour(@PathVariable Long id, @Valid @RequestBody LivreRequest request) {
-        Livre livre = LivreMapper.versEntite(request);
-        Livre livreModifie = livreService.mettreAJour(id, livre);
-        return ResponseEntity.ok(LivreMapper.versResponse(livreModifie));
-    }
-
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> supprimer(@PathVariable Long id) {
-        livreService.supprimer(id);
-        return ResponseEntity.noContent().build();
-    }
 }
+

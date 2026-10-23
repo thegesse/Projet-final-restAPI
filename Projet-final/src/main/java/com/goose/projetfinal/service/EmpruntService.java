@@ -8,10 +8,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
-
-import java.time.LocalDate;
-import java.util.Optional;
 
 import java.time.LocalDate;
 import java.util.Optional;
@@ -53,6 +51,7 @@ public class EmpruntService {
     }
 
 
+    @Transactional
     public Emprunt creer(Emprunt emprunt) {
         Long livreId = emprunt.getLivreId();
         if (!livreExiste(livreId)) {
@@ -75,6 +74,7 @@ public class EmpruntService {
         return empruntRepository.save(emprunt);
     }
 
+    @Transactional
     public Emprunt retourner(Long id) {
         Emprunt emprunt = empruntRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Emprunt inexistant"));
@@ -93,10 +93,6 @@ public class EmpruntService {
 
     public Page<Emprunt> recupererEnCours(Pageable pageable) {
         return empruntRepository.findByRenduFalse(pageable);
-    }
-
-    public Page<Emprunt> recupererEnRetard(Pageable pageable) {
-        return empruntRepository.findByRenduFalseAndDateRetourPrevueBefore(LocalDate.now(), pageable);
     }
 
     public Page<Emprunt> recupererEnRetard(Pageable pageable) {
